@@ -1,11 +1,28 @@
+const ApiError = require("../utils/ApiError");
+
 function errorHandler(err, req, res, next) {
     console.error(err);
 
-    if (err.code === "P2025") {
-        return res.status(404).json({ errors: ["testimonial not found"] });
+    let statusCode = 500;
+    let message = "Internal server error";
+
+    if (err instanceof ApiError) {
+        statusCode = err.statusCode;
+        message = err.message;
+    } else if (err.code === "P2025") {
+        statusCode = 404;
+        message = "Testimonial not found";
+    } else if (err.name === "ZodError") {
+        statusCode = 400;
+        message = err.errors.map(e => e.message).join(", ");
     }
 
-    res.status(500).json({ errors: ["internal server error"] });
+    res.status(statusCode).json({
+        error: {
+            code: statusCode,
+            message: message
+        }
+    });
 }
 
 module.exports = { errorHandler };

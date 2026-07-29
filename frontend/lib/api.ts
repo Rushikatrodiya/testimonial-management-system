@@ -1,68 +1,36 @@
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
+import apiClient from "./apiClient";
+import type { Testimonial, PaginatedResponse, SubmitTestimonialPayload, TestimonialStatus } from "./types";
 
-async function request<T>(path: string, options?: RequestInit): Promise<T> {
-    const res = await fetch(`${API_BASE}${path}`, {
-        ...options,
-        headers: {
-            "Content-Type": "application/json",
-            ...(options && options.headers),
-        },
+export async function submitTestimonial(data: SubmitTestimonialPayload): Promise<Testimonial> {
+    const res = await apiClient.post<Testimonial>("/api/testimonials", data);
+    return res.data;
+}
+
+export async function fetchTestimonials(
+    status?: TestimonialStatus,
+    { skip, take }: { skip?: number; take?: number } = {}
+): Promise<PaginatedResponse> {
+    const res = await apiClient.get<PaginatedResponse>("/api/testimonials", {
+        params: { status, skip, take },
     });
-
-    const body = await res.json().catch(() => null);
-
-    if (!res.ok) {
-        const message =
-            body && body.errors ? body.errors.join(", ") : `Request failed with status ${res.status}`;
-        throw new Error(message);
-    }
-
-    return body as T;
+    return res.data;
 }
 
-export type TestimonialStatus = "PENDING" | "APPROVED" | "REJECTED";
-
-export interface Testimonial {
-    id: string;
-    name: string;
-    email: string;
-    company?: string;
-    message: string;
-    rating: number;
-    photoUrl?: string;
-    status: TestimonialStatus;
-    createdAt: string;
-}
-
-export interface SubmitTestimonialPayload {
-    name: string;
-    email: string;
-    company?: string;
-    message: string;
-    rating: number;
-    photoUrl?: string;
-}
-
-export function submitTestimonial(data: SubmitTestimonialPayload): Promise<Testimonial> {
-    return request<Testimonial>("/api/testimonials", {
-        method: "POST",
-        body: JSON.stringify(data),
+export async function fetchApprovedTestimonials(
+    { skip, take }: { skip?: number; take?: number } = {}
+): Promise<PaginatedResponse> {
+    const res = await apiClient.get<PaginatedResponse>("/api/testimonials/approved", {
+        params: { skip, take },
     });
+    return res.data;
 }
 
-export function fetchTestimonials(status?: TestimonialStatus): Promise<Testimonial[]> {
-    const query = status ? `?status=${status}` : "";
-    return request<Testimonial[]>(`/api/testimonials${query}`);
+export async function approveTestimonial(id: string): Promise<Testimonial> {
+    const res = await apiClient.patch<Testimonial>(`/api/testimonials/${id}/approve`);
+    return res.data;
 }
 
-export function fetchApprovedTestimonials(): Promise<Testimonial[]> {
-    return request<Testimonial[]>("/api/testimonials/approved");
-}
-
-export function approveTestimonial(id: string): Promise<Testimonial> {
-    return request<Testimonial>(`/api/testimonials/${id}/approve`, { method: "PATCH" });
-}
-
-export function rejectTestimonial(id: string): Promise<Testimonial> {
-    return request<Testimonial>(`/api/testimonials/${id}/reject`, { method: "PATCH" });
+export async function rejectTestimonial(id: string): Promise<Testimonial> {
+    const res = await apiClient.patch<Testimonial>(`/api/testimonials/${id}/reject`);
+    return res.data;
 }

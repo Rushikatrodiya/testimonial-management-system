@@ -1,6 +1,12 @@
 import "./globals.css";
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
+import { Navbar } from "@/components/Navbar";
+import { Providers } from "./providers";
+import { Geist } from "next/font/google";
+import { cn } from "@/lib/utils";
+
+const geist = Geist({subsets:['latin'],variable:'--font-sans'});
 
 export const metadata: Metadata = {
   title: "Testimonials",
@@ -9,20 +15,12 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="en" className={cn("font-sans", geist.variable)}>
       <body className="bg-neutral-50 text-neutral-900">
-        <nav className="flex gap-6 px-6 py-4 border-b border-neutral-200 bg-white">
-          <a href="/" className="text-sm font-medium hover:text-emerald-700">
-            Submit
-          </a>
-          <a href="/dashboard" className="text-sm font-medium hover:text-emerald-700">
-            Dashboard
-          </a>
-          <a href="/wall" className="text-sm font-medium hover:text-emerald-700">
-            Wall
-          </a>
-        </nav>
-        {children}
+        <Providers>
+          <Navbar />
+          {children}
+        </Providers>
       </body>
     </html>
   );

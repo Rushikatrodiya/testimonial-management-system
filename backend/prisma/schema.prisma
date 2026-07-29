@@ -14,16 +14,18 @@ enum TestimonialStatus {
 }
 
 model Testimonial {
-  id        String            @id @default(uuid())
-  name      String
-  email     String
-  company   String?
-  message   String
-  rating    Int
-  photoUrl  String?
-  status    TestimonialStatus @default(PENDING)
-  createdAt DateTime          @default(now())
-  updatedAt DateTime          @updatedAt
+  id          String            @id @default(uuid())
+  name        String
+  email       String
+  company     String?
+  message     String
+  rating      Int
+  photoUrl    String?
+  status      TestimonialStatus @default(PENDING)
+  flagReason  String?
+  isDuplicate Boolean           @default(false)
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
 
   @@index([status])
 }

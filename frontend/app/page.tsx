@@ -1,8 +1,13 @@
 "use client";
 
 import { useState, FormEvent } from "react";
-import { submitTestimonial, SubmitTestimonialPayload } from "../lib/api";
+import { submitTestimonial } from "../lib/api";
+import type { SubmitTestimonialPayload } from "../lib/types";
 import { StarRatingInput } from "../components/StarRating";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Card, CardContent } from "@/components/ui/card";
 
 interface FormState {
   name: string;
@@ -65,24 +70,26 @@ export default function SubmissionPage() {
   if (status === "success") {
     return (
       <main className="max-w-xl mx-auto px-6 py-16">
-        <div className="bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-lg p-6 text-center">
-          <h1 className="text-lg font-semibold mb-1">Thank you!</h1>
-          <p className="text-sm">Your testimonial has been submitted and is pending review.</p>
+        <Card className="border-indigo-200 bg-indigo-50 shadow-sm">
+          <CardContent className="p-8 text-center">
+            <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center text-3xl mx-auto mb-4 shadow-sm">🎉</div>
+            <h1 className="text-2xl font-bold tracking-tight text-indigo-900 mb-2">Thank you!</h1>
+            <p className="text-indigo-700/80">Your testimonial has been submitted and is pending review.</p>
+          </CardContent>
+        </Card>
+        <div className="text-center mt-8">
+          <Button variant="ghost" onClick={() => setStatus("idle")} className="text-indigo-600 hover:text-indigo-800">
+            Submit another testimonial →
+          </Button>
         </div>
-        <button
-          className="mt-6 text-sm font-medium text-emerald-700 hover:underline"
-          onClick={() => setStatus("idle")}
-        >
-          Submit another testimonial
-        </button>
       </main>
     );
   }
 
   return (
     <main className="max-w-xl mx-auto px-6 py-16">
-      <h1 className="text-2xl font-semibold mb-1">Share your experience</h1>
-      <p className="text-neutral-500 mb-8">We'd love to hear what you think.</p>
+      <h1 className="text-3xl font-bold tracking-tight text-slate-900 mb-2">Share your experience</h1>
+      <p className="text-slate-500 mb-8 text-lg">We&apos;d love to hear what you think about our product.</p>
 
       {error && (
         <div className="bg-red-50 border border-red-200 text-red-700 text-sm rounded-lg p-4 mb-6">
@@ -90,70 +97,70 @@ export default function SubmissionPage() {
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="bg-white border border-neutral-200 rounded-xl p-6 space-y-5">
-        <div>
-          <label className="block text-sm font-semibold mb-1.5">Name</label>
-          <input
-            required
-            value={form.name}
-            onChange={(e) => updateField("name", e.target.value)}
-            className="w-full border border-neutral-300 rounded-lg px-3 py-2 text-sm"
-          />
-        </div>
+      <Card>
+        <CardContent className="p-8">
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <div className="space-y-1.5">
+              <label className="block text-sm font-semibold text-slate-700">Name</label>
+              <Input
+                required
+                value={form.name}
+                onChange={(e) => updateField("name", e.target.value)}
+                placeholder="John Smith"
+              />
+            </div>
 
-        <div>
-          <label className="block text-sm font-semibold mb-1.5">Email</label>
-          <input
-            required
-            type="email"
-            value={form.email}
-            onChange={(e) => updateField("email", e.target.value)}
-            className="w-full border border-neutral-300 rounded-lg px-3 py-2 text-sm"
-          />
-        </div>
+            <div className="space-y-1.5">
+              <label className="block text-sm font-semibold text-slate-700">Email</label>
+              <Input
+                required
+                type="email"
+                value={form.email}
+                onChange={(e) => updateField("email", e.target.value)}
+                placeholder="john@example.com"
+              />
+            </div>
 
-        <div>
-          <label className="block text-sm font-semibold mb-1.5">Company (optional)</label>
-          <input
-            value={form.company}
-            onChange={(e) => updateField("company", e.target.value)}
-            className="w-full border border-neutral-300 rounded-lg px-3 py-2 text-sm"
-          />
-        </div>
+            <div className="space-y-1.5">
+              <label className="block text-sm font-semibold text-slate-700">Company <span className="text-slate-400 font-normal">(optional)</span></label>
+              <Input
+                value={form.company}
+                onChange={(e) => updateField("company", e.target.value)}
+                placeholder="Acme Corp"
+              />
+            </div>
 
-        <div>
-          <label className="block text-sm font-semibold mb-1.5">Your testimonial</label>
-          <textarea
-            required
-            value={form.message}
-            onChange={(e) => updateField("message", e.target.value)}
-            className="w-full border border-neutral-300 rounded-lg px-3 py-2 text-sm min-h-[100px]"
-          />
-        </div>
+            <div className="space-y-1.5">
+              <label className="block text-sm font-semibold text-slate-700">Your testimonial</label>
+              <Textarea
+                required
+                value={form.message}
+                onChange={(e) => updateField("message", e.target.value)}
+                className="min-h-[120px]"
+                placeholder="Tell us about your experience..."
+              />
+            </div>
 
-        <div>
-          <label className="block text-sm font-semibold mb-1.5">Rating</label>
-          <StarRatingInput value={form.rating} onChange={(v) => updateField("rating", v)} />
-        </div>
+            <div className="space-y-1.5">
+              <label className="block text-sm font-semibold text-slate-700">Rating</label>
+              <StarRatingInput value={form.rating} onChange={(v) => updateField("rating", v)} />
+            </div>
 
-        <div>
-          <label className="block text-sm font-semibold mb-1.5">Photo URL (optional)</label>
-          <input
-            value={form.photoUrl}
-            onChange={(e) => updateField("photoUrl", e.target.value)}
-            className="w-full border border-neutral-300 rounded-lg px-3 py-2 text-sm"
-            placeholder="https://..."
-          />
-        </div>
+            <div className="space-y-1.5">
+              <label className="block text-sm font-semibold text-slate-700">Photo URL <span className="text-slate-400 font-normal">(optional)</span></label>
+              <Input
+                value={form.photoUrl}
+                onChange={(e) => updateField("photoUrl", e.target.value)}
+                placeholder="https://..."
+              />
+            </div>
 
-        <button
-          type="submit"
-          disabled={status === "submitting"}
-          className="w-full bg-emerald-700 hover:bg-emerald-800 disabled:opacity-60 text-white font-semibold rounded-lg py-2.5 text-sm"
-        >
-          {status === "submitting" ? "Submitting..." : "Submit testimonial"}
-        </button>
-      </form>
+            <Button type="submit" disabled={status === "submitting"} className="w-full mt-2" size="lg">
+              {status === "submitting" ? "Submitting..." : "Submit testimonial"}
+            </Button>
+          </form>
+        </CardContent>
+      </Card>
     </main>
   );
 }
