@@ -29,7 +29,18 @@ export function SubmissionRow({ testimonial, onApprove, onReject }: SubmissionRo
 
     const { data: summary, isLoading: isSummarizing, isError } = useQuery({
         queryKey: ["testimonial-summary", testimonial.id],
-        queryFn: () => summarizeTestimonial(testimonial.message),
+        queryFn: async () => {
+            const cacheKey = `tw-summary-${testimonial.id}`;
+            if (typeof window !== "undefined") {
+                const cached = localStorage.getItem(cacheKey);
+                if (cached) return cached;
+            }
+            const result = await summarizeTestimonial(testimonial.message);
+            if (typeof window !== "undefined") {
+                localStorage.setItem(cacheKey, result);
+            }
+            return result;
+        },
         enabled: isLong,
         staleTime: Infinity,
         retry: 2,
