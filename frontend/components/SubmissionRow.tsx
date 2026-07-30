@@ -1,7 +1,10 @@
 "use client";
 
+import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { StarRatingDisplay } from "./StarRating";
 import type { Testimonial, TestimonialStatus } from "../lib/types";
+import { summarizeTestimonial } from "../lib/api";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -19,6 +22,24 @@ interface SubmissionRowProps {
 }
 
 export function SubmissionRow({ testimonial, onApprove, onReject }: SubmissionRowProps) {
+    const wordCount = testimonial.message.split(/\s+/).filter(Boolean).length;
+    const isLong = wordCount > 150;
+
+    const [showFull, setShowFull] = useState(!isLong);
+
+    const { data: summary, isLoading: isSummarizing, isError } = useQuery({
+        queryKey: ["testimonial-summary", testimonial.id],
+        queryFn: () => summarizeTestimonial(testimonial.message),
+        enabled: isLong,
+        staleTime: Infinity,
+        retry: 2,
+        refetchOnWindowFocus: false,
+        refetchOnMount: false,
+        refetchOnReconnect: false,
+    });
+
+    const displayFullText = showFull || isError;
+
     return (
         <Card className="mb-4 hover:shadow-md transition-all duration-300">
             <CardContent className="p-6">
@@ -55,7 +76,31 @@ export function SubmissionRow({ testimonial, onApprove, onReject }: SubmissionRo
 
                 <StarRatingDisplay value={testimonial.rating} />
 
-                <p className="text-sm mt-4 text-slate-700 leading-relaxed italic">"{testimonial.message}"</p>
+                <div className="mt-4">
+                    {isLong && !displayFullText ? (
+                        <p className="text-sm text-slate-700 leading-relaxed italic">
+                            {isSummarizing ? (
+                                <span className="flex items-center gap-2 text-slate-500">
+                                    <span className="animate-pulse">Summarizing...</span>
+                                </span>
+                            ) : (
+                                `"${summary}"`
+                            )}
+                        </p>
+                    ) : (
+                        <p className="text-sm text-slate-700 leading-relaxed italic">
+                            "{testimonial.message}"
+                        </p>
+                    )}
+                    {isLong && !isError && (
+                        <button
+                            onClick={() => setShowFull(!showFull)}
+                            className="text-xs text-blue-600 hover:underline mt-1 font-medium"
+                        >
+                            {showFull ? "Show summary" : "Read full"}
+                        </button>
+                    )}
+                </div>
 
                 <p className="text-xs text-slate-400 mt-3 font-medium">
                     {testimonial.email} · {new Date(testimonial.createdAt).toLocaleDateString()}
