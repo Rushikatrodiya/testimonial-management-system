@@ -60,4 +60,3 @@
 
 1. Wrap the widget output in a **Shadow DOM** to guarantee absolute CSS isolation from third-party host sites.
 2. Expand the AI integration to auto-tag sentiment (Positive/Neutral/Negative) directly in the backend `testimonials.service.js` during submission.
-3. Write automated unit tests for the spam detection and rate-limiting logic using Jest.
